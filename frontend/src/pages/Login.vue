@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useMessage } from 'naive-ui'
 import { useAuthStore } from '@/stores/auth'
 import { encrypt } from '@/utils/crypto'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const message = useMessage()
 
 const username = ref('')
 const password = ref('')
-const error = ref('')
 const loading = ref(false)
 
 // 输入验证
@@ -18,21 +19,20 @@ const isValid = computed(() => username.value.trim() && password.value.trim())
 async function handleLogin() {
   if (!isValid.value) return
 
-  error.value = ''
   loading.value = true
-
   try {
     // 加密密码
     const encryptedPassword = encrypt(password.value)
-
     const success = await authStore.login(username.value, encryptedPassword)
+
     if (success) {
+      message.success('登录成功')
       router.push('/dashboard')
     } else {
-      error.value = '用户名或密码错误'
+      message.error('用户名或密码错误')
     }
   } catch (e) {
-    error.value = '登录失败，请稍后重试'
+    message.error('登录失败，请稍后重试')
     console.error(e)
   } finally {
     loading.value = false
@@ -43,89 +43,85 @@ async function handleLogin() {
 <template>
   <div class="login-page">
     <div class="login-bg">
-      <div class="bg-shape bg-shape-1"></div>
-      <div class="bg-shape bg-shape-2"></div>
-      <div class="bg-shape bg-shape-3"></div>
+      <div class="bg-gradient"></div>
+      <div class="bg-pattern"></div>
     </div>
 
     <div class="login-container">
-      <div class="login-card">
-        <div class="card-header">
-          <div class="logo">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <h1>Vue-Python</h1>
-          <p>全栈应用管理平台</p>
-        </div>
-
-        <form @submit.prevent="handleLogin" class="login-form">
-          <div class="form-group">
-            <label for="username">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 21V19C20 16.7909 18.2091 15 16 15H8C5.79086 15 4 16.7909 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <n-card class="login-card" :bordered="false">
+        <div class="card-content">
+          <div class="logo-section">
+            <div class="logo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z"></path>
+                <path d="M2 17L12 22L22 17"></path>
+                <path d="M2 12L12 17L22 12"></path>
               </svg>
-              用户名
-            </label>
-            <input
-              id="username"
-              v-model="username"
-              type="text"
-              placeholder="请输入用户名"
-              autocomplete="username"
-              required
-            />
+            </div>
+            <h1>Vue-Python</h1>
+            <p>全栈应用管理平台</p>
           </div>
 
-          <div class="form-group">
-            <label for="password">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M7 11V7C7 4.23858 9.23858 2 12 2C14.7614 2 17 4.23858 17 7V11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              密码
-            </label>
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              placeholder="请输入密码"
-              autocomplete="current-password"
-              required
-            />
+          <n-form ref="formRef" :model="{}" :show-label="false">
+            <n-form-item path="username">
+              <n-input
+                v-model:value="username"
+                placeholder="请输入用户名"
+                size="large"
+                :bordered="false"
+                @keydown.enter="handleLogin"
+              >
+                <template #prefix>
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </template>
+              </n-input>
+            </n-form-item>
+
+            <n-form-item path="password">
+              <n-input
+                v-model:value="password"
+                type="password"
+                placeholder="请输入密码"
+                size="large"
+                :bordered="false"
+                show-password-on="click"
+                @keydown.enter="handleLogin"
+              >
+                <template #prefix>
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                </template>
+              </n-input>
+            </n-form-item>
+
+            <div class="form-extra">
+              <n-checkbox :checked="false">记住我</n-checkbox>
+              <a class="forgot-link">忘记密码？</a>
+            </div>
+
+            <n-button
+              type="primary"
+              block
+              size="large"
+              :loading="loading"
+              :disabled="!isValid"
+              @click="handleLogin"
+            >
+              登 录
+            </n-button>
+          </n-form>
+
+          <div class="card-footer">
+            <span>测试账号: </span>
+            <n-tag type="info" size="small">admin / 123456</n-tag>
           </div>
-
-          <div class="form-options">
-            <label class="checkbox-label">
-              <input type="checkbox" />
-              <span>记住我</span>
-            </label>
-            <a href="#" class="forgot-link">忘记密码？</a>
-          </div>
-
-          <div v-if="error" class="error-message">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-              <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            {{ error }}
-          </div>
-
-          <button type="submit" :disabled="!isValid || loading" class="login-btn">
-            <span v-if="loading" class="spinner"></span>
-            {{ loading ? '登录中...' : '登 录' }}
-          </button>
-        </form>
-
-        <div class="card-footer">
-          <p>默认账号: <strong>admin</strong> / <strong>123456</strong></p>
         </div>
-      </div>
+      </n-card>
 
       <p class="copyright">© 2024 Vue-Python Framework</p>
     </div>
@@ -138,269 +134,178 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0f0f23;
+  background: #0a0a0f;
   position: relative;
   overflow: hidden;
 }
 
-/* Background shapes */
 .login-bg {
   position: absolute;
   inset: 0;
   overflow: hidden;
 }
 
-.bg-shape {
+.bg-gradient {
   position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.5;
+  width: 600px;
+  height: 600px;
+  top: -200px;
+  right: -200px;
+  background: radial-gradient(circle, rgba(103, 126, 234, 0.3) 0%, transparent 70%);
+  filter: blur(60px);
+  animation: float 8s ease-in-out infinite;
 }
 
-.bg-shape-1 {
-  width: 400px;
-  height: 400px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  top: -100px;
-  left: -100px;
-  animation: float 20s ease-in-out infinite;
-}
-
-.bg-shape-2 {
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  bottom: -50px;
-  right: -50px;
-  animation: float 15s ease-in-out infinite reverse;
-}
-
-.bg-shape-3 {
-  width: 200px;
-  height: 200px;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: pulse 10s ease-in-out infinite;
+.bg-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
 @keyframes float {
   0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(30px, 30px); }
-}
-
-@keyframes pulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
-  50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
+  50% { transform: translate(20px, 20px); }
 }
 
 .login-container {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
   padding: 20px;
 }
 
 .login-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-.card-header {
+.login-card :deep(.n-card__content) {
+  padding: 40px;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.logo-section {
   text-align: center;
-  margin-bottom: 32px;
 }
 
 .logo {
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 16px;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 16px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
+  box-shadow: 0 10px 30px -10px rgba(102, 126, 234, 0.5);
 }
 
 .logo svg {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
 }
 
-.card-header h1 {
+.logo-section h1 {
   font-size: 24px;
-  font-weight: 700;
-  color: #1a1a2e;
+  font-weight: 600;
+  color: #fff;
   margin-bottom: 8px;
 }
 
-.card-header p {
+.logo-section p {
   font-size: 14px;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.5);
 }
 
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.login-card :deep(.n-input) {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.login-card :deep(.n-input:hover),
+.login-card :deep(.n-input:focus) {
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.form-group label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
+.login-card :deep(.n-input__input-el) {
+  color: #fff;
 }
 
-.form-group label svg {
+.login-card :deep(.n-input__input-el::placeholder) {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.input-icon {
   width: 18px;
   height: 18px;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.4);
 }
 
-.form-group input {
-  padding: 14px 16px;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  font-size: 15px;
-  transition: all 0.3s;
-  background: #f9fafb;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: #667eea;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-}
-
-.form-group input::placeholder {
-  color: #9ca3af;
-}
-
-.form-options {
+.form-extra {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 14px;
+  margin-bottom: 24px;
 }
 
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  color: #6b7280;
-}
-
-.checkbox-label input {
-  width: 18px;
-  height: 18px;
-  accent-color: #667eea;
+.login-card :deep(.n-checkbox__label) {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .forgot-link {
   color: #667eea;
+  font-size: 14px;
   text-decoration: none;
-  font-weight: 500;
 }
 
 .forgot-link:hover {
   text-decoration: underline;
 }
 
-.error-message {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 10px;
-  color: #dc2626;
-  font-size: 14px;
-}
-
-.error-message svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-.login-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
+.login-card :deep(.n-button) {
+  height: 48px;
   border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
   font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
+  font-weight: 500;
 }
 
-.login-btn:hover:not(:disabled) {
+.login-card :deep(.n-button:hover) {
   transform: translateY(-2px);
   box-shadow: 0 10px 20px -10px rgba(102, 126, 234, 0.5);
 }
 
-.login-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 .card-footer {
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid #e5e7eb;
   text-align: center;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 }
 
-.card-footer p {
+.card-footer span {
+  color: rgba(255, 255, 255, 0.4);
   font-size: 13px;
-  color: #6b7280;
-}
-
-.card-footer strong {
-  color: #667eea;
 }
 
 .copyright {
   text-align: center;
   margin-top: 24px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.3);
 }
 </style>

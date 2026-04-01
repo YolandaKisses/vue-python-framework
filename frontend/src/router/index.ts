@@ -9,19 +9,19 @@ const routes: RouteRecordRaw[] = [
     path: '/login',
     name: 'Login',
     component: () => import('@/pages/Login.vue'),
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: false, title: '登录' },
   },
   {
     path: '/dashboard',
     name: 'Dashboard',
     component: () => import('@/pages/Dashboard.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, title: '仪表盘' },
   },
   {
     path: '/users',
     name: 'Users',
     component: () => import('@/pages/Users.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, title: '用户管理' },
   },
 ]
 

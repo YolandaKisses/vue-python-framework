@@ -1,110 +1,203 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { apiGet } from '@/utils/api'
+import { api } from '@/utils/request'
+import { SearchOutline, AddOutline, CreateOutline, TrashOutline } from '@vicons/ionicons5'
 import type { User } from '@/types'
 
 const users = ref<User[]>([])
 const loading = ref(false)
+const searchValue = ref('')
+
+// 模拟数据
+const mockUsers: User[] = [
+  { id: 1, username: 'admin', email: 'admin@example.com', is_active: true },
+  { id: 2, username: 'user01', email: 'user01@example.com', is_active: true },
+  { id: 3, username: 'user02', email: 'user02@example.com', is_active: false },
+  { id: 4, username: 'test', email: 'test@example.com', is_active: true },
+]
 
 onMounted(async () => {
   loading.value = true
   try {
-    users.value = await apiGet<User[]>('/api/v1/users')
-  } catch (error) {
-    console.error('Failed to fetch users:', error)
+    // 模拟数据
+    users.value = mockUsers
   } finally {
     loading.value = false
   }
 })
+
+function handleEdit(user: User) {
+  console.log('Edit user:', user)
+}
+
+function handleDelete(user: User) {
+  console.log('Delete user:', user)
+}
 </script>
 
 <template>
   <div class="users-page">
-    <h1>用户管理</h1>
-    <div class="users-table">
-      <div v-if="loading" class="loading">加载中...</div>
-      <table v-else>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>用户名</th>
-            <th>邮箱</th>
-            <th>状态</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="user in users" :key="user.id">
-            <td>{{ user.id }}</td>
-            <td>{{ user.username }}</td>
-            <td>{{ user.email }}</td>
-            <td>
-              <span :class="['status', user.is_active ? 'active' : 'inactive']">
-                {{ user.is_active ? '启用' : '禁用' }}
-              </span>
-            </td>
-          </tr>
-          <tr v-if="users.length === 0">
-            <td colspan="4" class="empty">暂无数据</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="page-header">
+      <div class="header-left">
+        <h1>用户管理</h1>
+        <p>管理系统用户账号</p>
+      </div>
+      <n-button type="primary">
+        <template #icon>
+          <n-icon :component="AddOutline" />
+        </template>
+        新增用户
+      </n-button>
     </div>
+
+    <n-card :bordered="false" class="content-card">
+      <div class="toolbar">
+        <n-input
+          v-model:value="searchValue"
+          placeholder="搜索用户..."
+          clearable
+          style="width: 300px"
+        >
+          <template #prefix>
+            <n-icon :component="SearchOutline" />
+          </template>
+        </n-input>
+      </div>
+
+      <n-data-table
+        :columns="columns"
+        :data="users"
+        :loading="loading"
+        :bordered="false"
+        :single-line="false"
+      />
+    </n-card>
   </div>
 </template>
 
+<script lang="ts">
+import { defineComponent, h } from 'vue'
+import { NButton, NTag, NIcon } from 'naive-ui'
+import { CreateOutline, TrashOutline } from '@vicons/ionicons5'
+
+const createColumns = () => {
+  return [
+    {
+      title: 'ID',
+      key: 'id',
+      width: 80,
+    },
+    {
+      title: '用户名',
+      key: 'username',
+    },
+    {
+      title: '邮箱',
+      key: 'email',
+    },
+    {
+      title: '状态',
+      key: 'is_active',
+      width: 100,
+      render: (row: User) => {
+        return h(NTag, {
+          type: row.is_active ? 'success' : 'error',
+          size: 'small',
+        }, { default: () => row.is_active ? '启用' : '禁用' })
+      },
+    },
+    {
+      title: '操作',
+      key: 'actions',
+      width: 120,
+      render: (row: User) => {
+        return h('div', { class: 'action-buttons' }, [
+          h(NButton, {
+            size: 'small',
+            quaternary: true,
+            onClick: () => console.log('edit', row.id),
+          }, { icon: () => h(NIcon, { component: CreateOutline }) }),
+          h(NButton, {
+            size: 'small',
+            quaternary: true,
+            type: 'error',
+            onClick: () => console.log('delete', row.id),
+          }, { icon: () => h(NIcon, { component: TrashOutline }) }),
+        ])
+      },
+    },
+  ]
+}
+
+export default defineComponent({
+  setup() {
+    return {
+      columns: createColumns(),
+    }
+  },
+})
+</script>
+
 <style scoped>
 .users-page {
-  padding: 2rem;
+  padding: 24px;
 }
 
-.users-page h1 {
-  margin-bottom: 1.5rem;
-  color: #333;
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
 }
 
-.users-table {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th, td {
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-}
-
-th {
-  background: #f8f9fa;
+.header-left h1 {
+  font-size: 24px;
   font-weight: 600;
-  color: #555;
+  color: #fff;
+  margin-bottom: 4px;
 }
 
-.status {
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.85rem;
+.header-left p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
 }
 
-.status.active {
-  background: #d4edda;
-  color: #155724;
+.content-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.status.inactive {
-  background: #f8d7da;
-  color: #721c24;
+.content-card :deep(.n-card__content) {
+  padding: 20px;
 }
 
-.loading, .empty {
-  text-align: center;
-  padding: 2rem;
-  color: #999;
+.toolbar {
+  margin-bottom: 20px;
+}
+
+.content-card :deep(.n-data-table) {
+  background: transparent;
+}
+
+.content-card :deep(.n-data-table-th) {
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.content-card :deep(.n-data-table-td) {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.content-card :deep(.n-data-table-tr:hover .n-data-table-td) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
 }
 </style>

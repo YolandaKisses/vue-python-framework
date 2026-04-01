@@ -1,94 +1,205 @@
 <script setup lang="ts">
-import { RouterLink, useRouter } from 'vue-router'
+import { h } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import {
+  DashboardOutline,
+  PeopleOutline,
+  MenuOutline,
+  LogOutOutline,
+} from '@vicons/ionicons5'
 
-const authStore = useAuthStore()
 const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
+
+const menuOptions = [
+  {
+    label: '仪表盘',
+    key: '/dashboard',
+    icon: () => h(DashboardOutline),
+  },
+  {
+    label: '用户管理',
+    key: '/users',
+    icon: () => h(PeopleOutline),
+  },
+]
+
+function handleMenuSelect(key: string) {
+  router.push(key)
+}
 
 function handleLogout() {
   authStore.logout()
   router.push('/login')
 }
+
+const activeKey = route.path
 </script>
 
 <template>
   <div class="app-layout">
-    <header class="header">
-      <div class="logo">Vue-Python 全栈</div>
-      <nav class="nav">
-        <RouterLink to="/dashboard">仪表盘</RouterLink>
-        <RouterLink to="/users">用户</RouterLink>
-      </nav>
-      <div class="user-info">
-        <span>{{ authStore.user?.username || '用户' }}</span>
-        <button @click="handleLogout" class="logout-btn">退出</button>
-      </div>
-    </header>
-    <main class="main">
-      <slot />
-    </main>
+    <n-layout has-sider class="layout">
+      <!-- Sidebar -->
+      <n-layout-sider
+        bordered
+        collapse-mode="width"
+        :collapsed-width="64"
+        :width="220"
+        show-trigger="bar"
+        :native-scrollbar="false"
+        class="sidebar"
+      >
+        <div class="logo">
+          <n-icon :component="MenuOutline" :size="24" />
+          <span class="logo-text">Vue-Python</span>
+        </div>
+
+        <n-menu
+          :options="menuOptions"
+          :value="activeKey"
+          :collapsed-width="64"
+          :collapsed-icon-size="22"
+          @update:value="handleMenuSelect"
+        />
+
+        <div class="sidebar-footer">
+          <n-button quaternary block @click="handleLogout">
+            <template #icon>
+              <n-icon :component="LogOutOutline" />
+            </template>
+            退出登录
+          </n-button>
+        </div>
+      </n-layout-sider>
+
+      <!-- Main Content -->
+      <n-layout class="main-layout">
+        <n-layout-header bordered class="header">
+          <div class="header-left">
+            <h2>{{ route.meta.title || '仪表盘' }}</h2>
+          </div>
+          <div class="header-right">
+            <n-space>
+              <n-tag :bordered="false" type="success">
+                {{ authStore.user?.username || 'admin' }}
+              </n-tag>
+              <n-button quaternary circle @click="handleLogout">
+                <template #icon>
+                  <n-icon :component="LogOutOutline" />
+                </template>
+              </n-button>
+            </n-space>
+          </div>
+        </n-layout-header>
+
+        <n-layout-content class="content">
+          <router-view />
+        </n-layout-content>
+      </n-layout>
+    </n-layout>
   </div>
 </template>
 
 <style scoped>
 .app-layout {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  height: 100vh;
+  background: #0a0a0f;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 2rem;
-  height: 60px;
-  background: #2c3e50;
-  color: white;
+.layout {
+  height: 100%;
+}
+
+.sidebar {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 .logo {
-  font-size: 1.25rem;
-  font-weight: bold;
-}
-
-.nav {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.nav a {
-  color: #bdc3c7;
-  text-decoration: none;
-  transition: color 0.3s;
-}
-
-.nav a:hover, .nav a.router-link-active {
-  color: white;
-}
-
-.user-info {
+  height: 60px;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
+  gap: 10px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.logout-btn {
-  padding: 0.5rem 1rem;
-  background: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.3s;
+.sidebar :deep(.n-menu) {
+  background: transparent;
 }
 
-.logout-btn:hover {
-  background: #c0392b;
+.sidebar :deep(.n-menu-item) {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 4px 8px;
+  border-radius: 8px;
 }
 
-.main {
-  flex: 1;
-  background: #f5f6fa;
+.sidebar :deep(.n-menu-item:hover) {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar :deep(.n-menu-item.n-menu-item--selected) {
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.15);
+}
+
+.sidebar :deep(.n-menu-item-content::after) {
+  display: none;
+}
+
+.sidebar-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-footer :deep(.n-button) {
+  color: rgba(255, 255, 255, 0.6);
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.sidebar-footer :deep(.n-button:hover) {
+  color: #fff;
+}
+
+.main-layout {
+  background: #0a0a0f;
+}
+
+.header {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.header-left h2 {
+  font-size: 18px;
+  font-weight: 500;
+  color: #fff;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.content {
+  padding: 0;
+  background: transparent;
 }
 </style>
