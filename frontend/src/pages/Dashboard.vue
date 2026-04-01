@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, h } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { api } from '@/utils/request'
 import type { HealthCheck } from '@/types'
@@ -18,6 +18,80 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+// SVG 图标组件
+const UserIcon = () => ({
+  type: 'svg' as const,
+  props: {
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '2',
+    style: { width: '24px', height: '24px' }
+  },
+  children: [
+    { type: 'path', props: { d: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2' } },
+    { type: 'circle', props: { cx: '9', cy: '7', r: '4' } },
+    { type: 'path', props: { d: 'M23 21v-2a4 4 0 0 0-3-3.87' } },
+    { type: 'path', props: { d: 'M16 3.13a4 4 0 0 1 0 7.75' } }
+  ]
+})
+
+const ChartIcon = () => ({
+  type: 'svg' as const,
+  props: {
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '2',
+    style: { width: '24px', height: '24px' }
+  },
+  children: [
+    { type: 'polyline', props: { points: '22 12 18 12 15 21 9 3 6 12 2 12' } }
+  ]
+})
+
+const BoxIcon = () => ({
+  type: 'svg' as const,
+  props: {
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '2',
+    style: { width: '24px', height: '24px' }
+  },
+  children: [
+    { type: 'path', props: { d: 'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z' } }
+  ]
+})
+
+const SettingIcon = () => ({
+  type: 'svg' as const,
+  props: {
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '2',
+    style: { width: '24px', height: '24px' }
+  },
+  children: [
+    { type: 'circle', props: { cx: '12', cy: '12', r: '3' } },
+    { type: 'path', props: { d: 'M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z' } }
+  ]
+})
+
+const stats = [
+  { title: '用户总数', value: '1,234', icon: UserIcon, color: '#667eea' },
+  { title: '活跃用户', value: '856', icon: ChartIcon, color: '#f093fb' },
+  { title: '系统访问', value: '12.5k', icon: BoxIcon, color: '#4facfe' },
+  { title: '系统设置', value: '8', icon: SettingIcon, color: '#a8edea' },
+]
+
+const features = [
+  { title: '用户管理', desc: '管理系统用户信息', icon: UserIcon },
+  { title: '数据分析', desc: '查看数据统计报表', icon: ChartIcon },
+  { title: '系统设置', desc: '配置系统参数', icon: SettingIcon },
+]
 </script>
 
 <template>
@@ -36,74 +110,17 @@ onMounted(async () => {
 
       <!-- Stats Grid -->
       <n-grid :cols="4" :x-gap="20" :y-gap="20" responsive="screen" item-responsive>
-        <n-gi span="4 m:2 l:1">
+        <n-gi v-for="stat in stats" :key="stat.title" span="4 m:2 l:1">
           <n-card class="stat-card" :bordered="false">
             <div class="stat-content">
-              <div class="stat-icon stat-icon-1">
-                <n-icon :size="24">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                  </svg>
+              <div class="stat-icon" :style="{ background: `linear-gradient(135deg, ${stat.color} 0%, ${stat.color}88 100%)` }">
+                <n-icon :size="24" depth="3">
+                  <component :is="stat.icon" />
                 </n-icon>
               </div>
               <div class="stat-info">
-                <span class="stat-value">1,234</span>
-                <span class="stat-title">用户总数</span>
-              </div>
-            </div>
-          </n-card>
-        </n-gi>
-        <n-gi span="4 m:2 l:1">
-          <n-card class="stat-card" :bordered="false">
-            <div class="stat-content">
-              <div class="stat-icon stat-icon-2">
-                <n-icon :size="24">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                  </svg>
-                </n-icon>
-              </div>
-              <div class="stat-info">
-                <span class="stat-value">856</span>
-                <span class="stat-title">活跃用户</span>
-              </div>
-            </div>
-          </n-card>
-        </n-gi>
-        <n-gi span="4 m:2 l:1">
-          <n-card class="stat-card" :bordered="false">
-            <div class="stat-content">
-              <div class="stat-icon stat-icon-3">
-                <n-icon :size="24">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                  </svg>
-                </n-icon>
-              </div>
-              <div class="stat-info">
-                <span class="stat-value">12.5k</span>
-                <span class="stat-title">系统访问</span>
-              </div>
-            </div>
-          </n-card>
-        </n-gi>
-        <n-gi span="4 m:2 l:1">
-          <n-card class="stat-card" :bordered="false">
-            <div class="stat-content">
-              <div class="stat-icon stat-icon-4">
-                <n-icon :size="24">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                  </svg>
-                </n-icon>
-              </div>
-              <div class="stat-info">
-                <span class="stat-value">8</span>
-                <span class="stat-title">系统设置</span>
+                <span class="stat-value">{{ stat.value }}</span>
+                <span class="stat-title">{{ stat.title }}</span>
               </div>
             </div>
           </n-card>
@@ -143,49 +160,15 @@ onMounted(async () => {
         <n-gi span="3 l:1">
           <n-card title="功能模块" :bordered="false" class="content-card">
             <n-space vertical :size="12">
-              <div class="feature-item">
-                <div class="feature-icon feature-icon-1">
+              <div v-for="feature in features" :key="feature.title" class="feature-item">
+                <div class="feature-icon">
                   <n-icon :size="20">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="9" cy="7" r="4"></circle>
-                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
+                    <component :is="feature.icon" />
                   </n-icon>
                 </div>
                 <div class="feature-info">
-                  <span class="feature-title">用户管理</span>
-                  <span class="feature-desc">管理系统用户信息</span>
-                </div>
-              </div>
-              <div class="feature-item">
-                <div class="feature-icon feature-icon-2">
-                  <n-icon :size="20">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <line x1="18" y1="20" x2="18" y2="10"></line>
-                      <line x1="12" y1="20" x2="12" y2="4"></line>
-                      <line x1="6" y1="20" x2="6" y2="14"></line>
-                    </svg>
-                  </n-icon>
-                </div>
-                <div class="feature-info">
-                  <span class="feature-title">数据分析</span>
-                  <span class="feature-desc">查看数据统计报表</span>
-                </div>
-              </div>
-              <div class="feature-item">
-                <div class="feature-icon feature-icon-3">
-                  <n-icon :size="20">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="3"></circle>
-                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                    </svg>
-                  </n-icon>
-                </div>
-                <div class="feature-info">
-                  <span class="feature-title">系统设置</span>
-                  <span class="feature-desc">配置系统参数</span>
+                  <span class="feature-title">{{ feature.title }}</span>
+                  <span class="feature-desc">{{ feature.desc }}</span>
                 </div>
               </div>
             </n-space>
@@ -242,22 +225,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.stat-icon-1 {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.stat-icon-2 {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.stat-icon-3 {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.stat-icon-4 {
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  color: #fff;
 }
 
 .stat-info {
@@ -341,22 +309,11 @@ onMounted(async () => {
   width: 40px;
   height: 40px;
   border-radius: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-}
-
-.feature-icon-1 {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.feature-icon-2 {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.feature-icon-3 {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
 
 .feature-info {

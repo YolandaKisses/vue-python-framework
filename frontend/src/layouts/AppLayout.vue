@@ -2,27 +2,72 @@
 import { h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import {
-  DashboardOutline,
-  PeopleOutline,
-  MenuOutline,
-  LogOutOutline,
-} from '@vicons/ionicons5'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 
+// SVG 图标组件
+const DashboardIcon = () => h('svg', {
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  'stroke-width': '2',
+  style: { width: '20px', height: '20px' }
+}, [
+  h('rect', { x: '3', y: '3', width: '7', height: '7', rx: '1' }),
+  h('rect', { x: '14', y: '3', width: '7', height: '7', rx: '1' }),
+  h('rect', { x: '3', y: '14', width: '7', height: '7', rx: '1' }),
+  h('rect', { x: '14', y: '14', width: '7', height: '7', rx: '1' })
+])
+
+const PeopleIcon = () => h('svg', {
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  'stroke-width': '2',
+  style: { width: '20px', height: '20px' }
+}, [
+  h('path', { d: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2' }),
+  h('circle', { cx: '9', cy: '7', r: '4' }),
+  h('path', { d: 'M23 21v-2a4 4 0 0 0-3-3.87' }),
+  h('path', { d: 'M16 3.13a4 4 0 0 1 0 7.75' })
+])
+
+const MenuIcon = () => h('svg', {
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  'stroke-width': '2',
+  style: { width: '24px', height: '24px' }
+}, [
+  h('line', { x1: '3', y1: '12', x2: '21', y2: '12' }),
+  h('line', { x1: '3', y1: '6', x2: '21', y2: '6' }),
+  h('line', { x1: '3', y1: '18', x2: '21', y2: '18' })
+])
+
+const LogoutIcon = () => h('svg', {
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  'stroke-width': '2',
+  style: { width: '20px', height: '20px' }
+}, [
+  h('path', { d: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4' }),
+  h('polyline', { points: '16 17 21 12 16 7' }),
+  h('line', { x1: '21', y1: '12', x2: '9', y2: '12' })
+])
+
 const menuOptions = [
   {
     label: '仪表盘',
     key: '/dashboard',
-    icon: () => h(DashboardOutline),
+    icon: DashboardIcon,
   },
   {
     label: '用户管理',
     key: '/users',
-    icon: () => h(PeopleOutline),
+    icon: PeopleIcon,
   },
 ]
 
@@ -52,7 +97,7 @@ const activeKey = route.path
         class="sidebar"
       >
         <div class="logo">
-          <n-icon :component="MenuOutline" :size="24" />
+          <n-icon :component="MenuIcon" :size="24" />
           <span class="logo-text">Vue-Python</span>
         </div>
 
@@ -67,7 +112,7 @@ const activeKey = route.path
         <div class="sidebar-footer">
           <n-button quaternary block @click="handleLogout">
             <template #icon>
-              <n-icon :component="LogOutOutline" />
+              <n-icon :component="LogoutIcon" />
             </template>
             退出登录
           </n-button>
@@ -87,7 +132,7 @@ const activeKey = route.path
               </n-tag>
               <n-button quaternary circle @click="handleLogout">
                 <template #icon>
-                  <n-icon :component="LogOutOutline" />
+                  <n-icon :component="LogoutIcon" />
                 </template>
               </n-button>
             </n-space>

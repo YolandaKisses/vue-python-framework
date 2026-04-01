@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { api } from '@/utils/request'
-import { SearchOutline, AddOutline, CreateOutline, TrashOutline } from '@vicons/ionicons5'
+import { ref, computed, defineComponent, h } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { NDataTable, NButton, NTag, NIcon } from 'naive-ui'
 import type { User } from '@/types'
+
+const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
 
 const users = ref<User[]>([])
 const loading = ref(false)
@@ -16,10 +21,77 @@ const mockUsers: User[] = [
   { id: 4, username: 'test', email: 'test@example.com', is_active: true },
 ]
 
+// SVG 图标
+const EditIcon = defineComponent({
+  render() {
+    return h('svg', {
+      viewBox: '0 0 24 24',
+      fill: 'none',
+      stroke: 'currentColor',
+      'stroke-width': '2',
+      style: { width: '16px', height: '16px' }
+    }, [
+      h('path', { d: 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7' }),
+      h('path', { d: 'M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z' })
+    ])
+  }
+})
+
+const DeleteIcon = defineComponent({
+  render() {
+    return h('svg', {
+      viewBox: '0 0 24 24',
+      fill: 'none',
+      stroke: 'currentColor',
+      'stroke-width': '2',
+      style: { width: '16px', height: '16px' }
+    }, [
+      h('polyline', { points: '3 6 5 6 21 6' }),
+      h('path', { d: 'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' })
+    ])
+  }
+})
+
+const columns = [
+  { title: 'ID', key: 'id', width: 80 },
+  { title: '用户名', key: 'username' },
+  { title: '邮箱', key: 'email' },
+  {
+    title: '状态',
+    key: 'is_active',
+    width: 100,
+    render(row: User) {
+      return h(NTag, {
+        type: row.is_active ? 'success' : 'error',
+        size: 'small',
+      }, { default: () => row.is_active ? '启用' : '禁用' })
+    }
+  },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 120,
+    render(row: User) {
+      return h('div', { class: 'action-buttons' }, [
+        h(NButton, {
+          size: 'small',
+          quaternary: true,
+          onClick: () => handleEdit(row)
+        }, { icon: () => h(NIcon, { component: EditIcon }) }),
+        h(NButton, {
+          size: 'small',
+          quaternary: true,
+          type: 'error',
+          onClick: () => handleDelete(row)
+        }, { icon: () => h(NIcon, { component: DeleteIcon }) })
+      ])
+    }
+  }
+]
+
 onMounted(async () => {
   loading.value = true
   try {
-    // 模拟数据
     users.value = mockUsers
   } finally {
     loading.value = false
@@ -44,7 +116,10 @@ function handleDelete(user: User) {
       </div>
       <n-button type="primary">
         <template #icon>
-          <n-icon :component="AddOutline" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
         </template>
         新增用户
       </n-button>
@@ -57,11 +132,7 @@ function handleDelete(user: User) {
           placeholder="搜索用户..."
           clearable
           style="width: 300px"
-        >
-          <template #prefix>
-            <n-icon :component="SearchOutline" />
-          </template>
-        </n-input>
+        />
       </div>
 
       <n-data-table
@@ -76,66 +147,12 @@ function handleDelete(user: User) {
 </template>
 
 <script lang="ts">
-import { defineComponent, h } from 'vue'
-import { NButton, NTag, NIcon } from 'naive-ui'
-import { CreateOutline, TrashOutline } from '@vicons/ionicons5'
-
-const createColumns = () => {
-  return [
-    {
-      title: 'ID',
-      key: 'id',
-      width: 80,
-    },
-    {
-      title: '用户名',
-      key: 'username',
-    },
-    {
-      title: '邮箱',
-      key: 'email',
-    },
-    {
-      title: '状态',
-      key: 'is_active',
-      width: 100,
-      render: (row: User) => {
-        return h(NTag, {
-          type: row.is_active ? 'success' : 'error',
-          size: 'small',
-        }, { default: () => row.is_active ? '启用' : '禁用' })
-      },
-    },
-    {
-      title: '操作',
-      key: 'actions',
-      width: 120,
-      render: (row: User) => {
-        return h('div', { class: 'action-buttons' }, [
-          h(NButton, {
-            size: 'small',
-            quaternary: true,
-            onClick: () => console.log('edit', row.id),
-          }, { icon: () => h(NIcon, { component: CreateOutline }) }),
-          h(NButton, {
-            size: 'small',
-            quaternary: true,
-            type: 'error',
-            onClick: () => console.log('delete', row.id),
-          }, { icon: () => h(NIcon, { component: TrashOutline }) }),
-        ])
-      },
-    },
-  ]
-}
-
-export default defineComponent({
+import { onMounted } from 'vue'
+export default {
   setup() {
-    return {
-      columns: createColumns(),
-    }
-  },
-})
+    return {}
+  }
+}
 </script>
 
 <style scoped>
