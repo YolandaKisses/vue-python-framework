@@ -60,3 +60,9 @@ Thumbs.db
 
 # Data
 data/
+
+# Python bytecode
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
