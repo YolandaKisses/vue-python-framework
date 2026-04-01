@@ -15,7 +15,8 @@ security = HTTPBearer()
 
 class TokenData(BaseModel):
     """Token payload data structure."""
-    user_id: int | None = None
+    user_id: str | None = None
+    username: str | None = None
     email: str | None = None
 
 
@@ -41,11 +42,12 @@ def get_current_user(
             settings.secret_key,
             algorithms=[settings.algorithm],
         )
-        user_id: int = payload.get("sub")
+        user_id: str = payload.get("sub")
+        username: str = payload.get("username")
         email: str = payload.get("email")
         if user_id is None:
             raise credentials_exception
-        token_data = TokenData(user_id=user_id, email=email)
+        token_data = TokenData(user_id=user_id, username=username, email=email)
     except JWTError:
         raise credentials_exception
     return token_data
