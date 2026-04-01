@@ -17,6 +17,7 @@ dependencies = [
     "psycopg2-binary>=2.9.10",
     "redis>=5.2.0",
     "httpx>=0.28.0",
+    "email-validator>=2.0.0",
 ]
 
 [project.optional-dependencies]
@@ -27,6 +28,9 @@ dev = [
     "ruff>=0.8.0",
     "mypy>=1.14.0",
 ]
+
+[tool.setuptools]
+packages = ["api", "core", "models", "schemas", "services", "utils"]
 
 [build-system]
 requires = ["setuptools>=65.0"]
